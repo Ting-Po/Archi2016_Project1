@@ -5,8 +5,21 @@
 
 using namespace std;
 
+
+
 int main()
 {
+    /*
+    int endian = 0x01020304;
+    char *ptr = (char *)&endian;
+    for(int i=0 ; i<4 ; i++){
+        printf("%d ", *ptr);
+        ptr++;
+    }
+    */
+    int PC=0;
+    int InstruNum = 0;
+
   FILE* pFile;
   long lSize;
   //unsigned char* buffer;
@@ -34,17 +47,65 @@ int main()
   if (result != lSize) {fputs ("Reading error",stderr); exit (3);}
 
  cout << endl;
+
+  m->storetoIns();
+
   for(int y=0; y<10; y++){
     printf("%x ",m->InM[y]);
   }
   /* the whole file is now loaded in the memory buffer. */
 
-  // terminate
+
+
+   // terminate
   //fclose (pFile);
+
+
+  PC |= m->InM[0];
+  PC <<= 8;
+  PC |= m->InM[1];
+  PC <<= 8;
+  PC |= m->InM[2];
+  PC <<= 8;
+  PC |= m->InM[3];
+
+  InstruNum |= m->InM[4];
+  InstruNum <<= 8;
+  InstruNum |= m->InM[5];
+  InstruNum <<= 8;
+  InstruNum |= m->InM[6];
+  InstruNum <<= 8;
+  InstruNum |= m->InM[7];
+
+  printf("\n%08x\n", PC);
+  printf("%08x\n", InstruNum);
+
+  printf("%08x\n", m->Ins[0]);
 
 
   fclose(pFile);
 //  free (buffer);
+
+
+    /*
+   int i=0;
+   while(i<PC){
+
+       m->Ins;
+
+
+
+
+        i++;
+   }
+    */
+    printf("%08x",m->rtopcode(0));
+
+
+
+
+
+
   return 0;
 
 
