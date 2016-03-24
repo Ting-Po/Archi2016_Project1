@@ -142,91 +142,118 @@ printf("%Test\n");
 
 
 
-int i = PC+4;
+//int i = PC+4;
 Reg* reg = new Reg();
 Function* func = new Function();
 
 
-func->add(m,i,reg,n);
+//func->add(m,i,reg,n);
 
 
-   while((m->rtopcode(i))!= 0x3F){
+   while((m->rtopcode(PC))!= 0x3F){
 
-        if(m->rtopcode(i) == 0x00){
-            switch(m->rtfunct(i)){
+        if(m->rtopcode(PC) == 0x00){
+            switch(m->rtfunct(PC)){
         case 0x20:
-            func->add(m,i,reg,n);
+            func->add(m,PC,reg);
+            PC =PC + 4;
         case 0x21:
-
+            func->addu(m,PC,reg);
+            PC =PC + 4;
         case 0x22:
-
+            func->sub(m,PC,reg);
+            PC =PC + 4;
         case 0x24:
-
+            func->And(m,PC,reg);
+            PC =PC + 4;
         case 0x25:
-
+            func->Or(m,PC,reg);
+            PC =PC + 4;
         case 0x26:
-
+            func->Xor(m,PC,reg);
+            PC =PC + 4;
         case 0x27:
-
+            func->nor(m,PC,reg);
+            PC =PC + 4;
         case 0x28:
-
+            func->nand(m,PC,reg);
+            PC =PC + 4;
         case 0x2A:
-
+            func->slt(m,PC,reg);
+            PC =PC + 4;
         case 0x00:
-
+            func->sll(m,PC,reg);
+            PC =PC + 4;
         case 0x05:
-
+            func->srl(m,PC,reg);
+            PC =PC + 4;
         case 0x03:
-
+            func->sra(m,PC,reg);
+            PC =PC + 4;
         case 0x08:
-
+            PC = reg->reg[m->rtrs(PC)];
         default:
-                ;
+                PC =PC + 4;
             }
         }else{
-            switch(m->rtopcode(i)){
+            switch(m->rtopcode(PC)){
             case 0x08:
-
-            case 0x089:
-
+                func->addi(m,PC,reg);
+                PC = PC + 4;
+            case 0x09:
+                func->addiu(m,PC,reg);
+                PC = PC +4;
             case 0x23:
-
+                func->lw(m,PC,reg,n);
+                PC = PC +4;
             case 0x21:
-
+                func->lh(m,PC,reg,n);
+                PC = PC +4;
             case 0x25:
-
+                func->lhu(m,PC,reg,n);
+                PC = PC + 4;
             case 0x20:
-
+                func->lb(m,PC,reg,n);
+                PC =PC +4;
             case 0x24:
-
+                func->lbu(m,PC,reg,n);
+                PC = PC + 4;
             case 0x2B:
-
+                func->sw(m,PC,reg,n);
+                PC = PC+4;
             case 0x29:
-
+                func->sh(m,PC,reg,n);
+                PC = PC +4;
             case 0x28:
-
+                func->sb(m,PC,reg,n);
+                PC = PC +4;
             case 0x0F:
-
+                func->lui(m,PC,reg,n);
+                PC = PC +4;
             case 0x0C:
-
+                func->andi(m,PC,reg);
+                PC = PC + 4;
             case 0x0D:
-
+                func->ori(m,PC,reg);
+                PC = PC + 4;
             case 0x0E:
-
+                func->nori(m,PC, reg);
+                PC = PC +4;
             case 0x0A:
-
+                func->slti(m,PC, reg);
+                PC = PC +4;
             case 0x04:
-
+                PC = func->beq(m,PC, reg);
             case 0x05:
-
+                PC = func->bne(m,PC, reg);
             case 0x07:
-
+                PC = func->bgtz(m,PC,reg);
             case 0x02:
-
+                PC = func->j(m,PC,reg);
             case 0x03:
-
+                PC = func->jal(m,PC,reg);
             default:
-                ;
+                PC = PC +4;
             }
 
         }
@@ -236,17 +263,36 @@ func->add(m,i,reg,n);
 
 
 
-        printf("Cycle: %d\n", i );
+        printf("Cycle: %d\n", PC );
+
+        break;
 
 
-
-        i+=4;
    }
 
 
+    unsigned short aa = 0xFFFF;
+    unsigned int a = 0xF1234567;
+    unsigned int b;
+    b =aa;
+    unsigned char a1,a2,a3,a4;
+    a1 = a;
+    a=a>>8;
+    a2 = a;
+    a = a>>8;
+    a3 = a;
+    a =a>>8;
+    a4 =a;
 
-
-
+    unsigned int aaa = 0xFFFFFFFF;
+    int bbb = 0xFFFFFFFF;
+    printf("%08x\n",a1);
+    printf("%08x\n",a2);
+    printf("%08x\n",a3);
+    printf("%08x\n",a4);
+    printf("%08x\n",b);
+    printf("%08x\n",aaa>>28);
+    printf("%08x\n",bbb>>28);
 
   return 0;
 
