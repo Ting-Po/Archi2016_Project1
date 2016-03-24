@@ -24,6 +24,8 @@ int main()
     int InstruNum = 0;
     int SP=0;
     int MemNum = 0;
+    int cycle = 0;
+    int i;
 
 
 
@@ -31,6 +33,7 @@ int main()
     long lSize;
     FILE* dFile;
     long dSize;
+    FILE* snap;
   //unsigned char* buffer;
     size_t result;
     InstruM* m = new InstruM();
@@ -38,6 +41,8 @@ int main()
 
   pFile = fopen ( "iimage.bin" , "rb" );
   dFile = fopen ( "dimage.bin" , "rb" );
+  snap = fopen("snapshot.rpt" , "w");
+
   if (pFile==NULL) {fputs ("File error",stderr); exit (1);}
 
   // obtain file size:
@@ -92,15 +97,15 @@ int main()
   MemNum <<= 8;
   MemNum |= n->sp_memnum[7];
 
-  fread (&(m->InM)[PC+4],sizeof(unsigned char),lSize-8,pFile);
+  fread (&(m->InM)[PC],sizeof(unsigned char),lSize-8,pFile);
   fread (n->mem,sizeof(unsigned char),dSize-8,dFile);
 
   cout <<lSize<< ' '<<result;
-  if (result+64 != lSize) {fputs ("Reading error",stderr); exit (3);}
+  //if (result+64 != lSize) {fputs ("Reading error",stderr); exit (3);}
 
  cout << endl;
 
-  m->storetoIns(PC+4);
+  m->storetoIns(PC);
 
 
   printf("%d\n", dSize);
@@ -149,111 +154,161 @@ Function* func = new Function();
 
 //func->add(m,i,reg,n);
 
+reg->reg[29] = SP;
+
+    printf("TTTT: %08x\n", m->rtopcode(PC) == 0x00);
+
 
    while((m->rtopcode(PC))!= 0x3F){
+
+        fprintf(snap, "cycle %d\n",cycle);
+        cycle++;
+        for(i=0;i<32;i++){
+            fprintf(snap, "$%02d: 0x%08X\n", i, reg->reg[i]);
+        }
+        fprintf(snap,"PC: 0x%08X\n\n\n", PC);
+
+
+
 
         if(m->rtopcode(PC) == 0x00){
             switch(m->rtfunct(PC)){
         case 0x20:
             func->add(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x21:
             func->addu(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x22:
             func->sub(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x24:
             func->And(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x25:
             func->Or(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x26:
             func->Xor(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x27:
             func->nor(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x28:
             func->nand(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x2A:
             func->slt(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x00:
             func->sll(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x05:
             func->srl(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x03:
             func->sra(m,PC,reg);
-            PC =PC + 4;
+            PC = PC + 4;
+            break;
         case 0x08:
             PC = reg->reg[m->rtrs(PC)];
+            break;
         default:
-                PC =PC + 4;
+                PC = PC + 4;
+                break;
             }
         }else{
             switch(m->rtopcode(PC)){
-            case 0x08:
+            case 0x08:{
                 func->addi(m,PC,reg);
                 PC = PC + 4;
+                break;
+            }
             case 0x09:
                 func->addiu(m,PC,reg);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x23:
                 func->lw(m,PC,reg,n);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x21:
                 func->lh(m,PC,reg,n);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x25:
                 func->lhu(m,PC,reg,n);
                 PC = PC + 4;
+                break;
             case 0x20:
                 func->lb(m,PC,reg,n);
-                PC =PC +4;
+                PC = PC + 4;
+                break;
             case 0x24:
                 func->lbu(m,PC,reg,n);
                 PC = PC + 4;
+                break;
             case 0x2B:
                 func->sw(m,PC,reg,n);
-                PC = PC+4;
+                PC = PC + 4;
+                break;
             case 0x29:
                 func->sh(m,PC,reg,n);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x28:
                 func->sb(m,PC,reg,n);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x0F:
                 func->lui(m,PC,reg,n);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x0C:
                 func->andi(m,PC,reg);
                 PC = PC + 4;
+                break;
             case 0x0D:
                 func->ori(m,PC,reg);
                 PC = PC + 4;
+                break;
             case 0x0E:
                 func->nori(m,PC, reg);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x0A:
                 func->slti(m,PC, reg);
-                PC = PC +4;
+                PC = PC + 4;
+                break;
             case 0x04:
                 PC = func->beq(m,PC, reg);
+                break;
             case 0x05:
                 PC = func->bne(m,PC, reg);
+                break;
             case 0x07:
                 PC = func->bgtz(m,PC,reg);
+                break;
             case 0x02:
                 PC = func->j(m,PC,reg);
+                break;
             case 0x03:
                 PC = func->jal(m,PC,reg);
+                break;
             default:
                 PC = PC +4;
+                break;
             }
 
         }
@@ -263,12 +318,15 @@ Function* func = new Function();
 
 
 
-        printf("Cycle: %d\n", PC );
-
-        break;
-
-
    }
+    fprintf(snap, "cycle %d\n",cycle);
+        cycle++;
+        for(i=0;i<32;i++){
+            fprintf(snap, "$%02d: 0x%08X\n", i, reg->reg[i]);
+        }
+        fprintf(snap,"PC: 0x%08X\n\n\n", PC);
+
+
 
 
     unsigned short aa = 0xFFFF;
@@ -293,6 +351,8 @@ Function* func = new Function();
     printf("%08x\n",b);
     printf("%08x\n",aaa>>28);
     printf("%08x\n",bbb>>28);
+
+    fclose(snap);
 
   return 0;
 
